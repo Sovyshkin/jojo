@@ -1,0 +1,290 @@
+<script>
+import axios from "axios";
+import ChartBar from "./ChartBar.vue";
+export default {
+  name: "AppMain",
+  components: { ChartBar },
+  data() {
+    return {
+      cards: [],
+      chartData: {},
+      tasks: [
+        {
+          id: 1,
+          desc: "Задача 1",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 2,
+          desc: "Задача 2",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 3,
+          desc: "Задача 3",
+          done: true,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 1,
+          desc: "Задача 1",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 2,
+          desc: "Задача 2",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 3,
+          desc: "Задача 3",
+          done: true,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 1,
+          desc: "Задача 1",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 2,
+          desc: "Задача 2",
+          done: false,
+          userID: 1,
+          deadline: "",
+        },
+        {
+          id: 3,
+          desc: "Задача 3",
+          done: true,
+          userID: 1,
+          deadline: "",
+        },
+      ],
+      phone: "",
+    };
+  },
+  methods: {
+    async load_kpi() {
+      try {
+        let response = await axios.post(`/kpi`);
+        console.log(response);
+        this.cards = response.data.kpi;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async load_info() {
+      try {
+        let response = await axios.post(`/tasks/by_user`, {
+          params: {
+            phone: "+79000000000",
+          },
+        });
+        console.log(response);
+        this.tasks = response.data.tasks;
+        let data = response.data.schedules;
+        if (data) {
+          this.chartData = Array.from(data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    check_verify() {
+      try {
+        this.phone = localStorage.getItem("phone");
+        if (!this.phone) {
+          this.$router.push({ name: "login" });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async changeComp(id, value) {
+      try {
+        let response = await axios.post(`/set_completed`, {
+          params: {
+            id,
+            completed: value,
+          },
+        });
+        console.log(response);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+  },
+  mounted() {
+    this.check_verify();
+    this.load_kpi();
+    this.load_info();
+  },
+};
+</script>
+<template>
+  <div class="wrapper">
+    <div class="card">
+      <div class="wrap-btns" v-if="phone == '+79449445678'">
+        <button @click="$router.push({ name: 'personal_data' })" class="btn">
+          Добавить сотрудника
+        </button>
+        <button @click="$router.push({ name: 'create_task' })" class="btn">
+          Создать задачу
+        </button>
+      </div>
+      <h1>KPI</h1>
+      <div class="wrap-group">
+        <div class="group" v-for="card in cards" :key="card.title">
+          <span>{{ Object.keys(card)[0] }}</span>
+          <div class="wrap-scale">
+            <div
+              class="scale"
+              :style="'width: ' + Object.values(card)[0] + '%'"
+            ></div>
+          </div>
+          <div class="percent">{{ Object.values(card)[0] }}%</div>
+        </div>
+      </div>
+      <h1>Задачи</h1>
+      <div class="tasks">
+        <div class="task" v-for="(task, i) in tasks" :key="i">
+          <input
+            v-model="task.completed"
+            type="checkbox"
+            :id="task + i"
+            @change="changeComp(task.id, task.completed)"
+          />
+          <label :for="task + i">{{ task.title }}</label>
+        </div>
+      </div>
+      <h1>График</h1>
+      <div class="wrap-bar" v-if="chartData">
+        <ChartBar :scheduleData="chartData" />
+      </div>
+    </div>
+  </div>
+</template>
+<style scoped>
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 90vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+h1 {
+  font-weight: 500;
+}
+.wrap-scale {
+  position: relative;
+  width: 200px;
+  border-radius: 10px;
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.scale {
+  position: absolute;
+  left: 0;
+  height: 10px;
+  background-color: #365811;
+}
+
+.wrap-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.group {
+  flex: 33%;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.percent {
+  width: 200px;
+  text-align: center;
+}
+
+.tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.task {
+  flex: 30%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+input[type="checkbox"] {
+  /* Базовый стиль чекбокса */
+  appearance: none;
+  -webkit-appearance: none; /* Для Safari */
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  /* Стиль для активного чекбокса */
+  background-image: url("https://img.icons8.com/ios-filled/32/checked-checkbox.png");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Дополнительные стили при наведении и фокусе */
+input[type="checkbox"]:hover,
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.task label {
+  cursor: pointer;
+}
+.wrap-btns {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn {
+  background-color: #000;
+  border-radius: 10px;
+  padding: 12px 17px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 16px;
+}
+</style>
