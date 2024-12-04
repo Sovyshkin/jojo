@@ -30,17 +30,22 @@ export default {
           this.message = response.data.message;
           let phone = response.data.phone;
           let agreement = response.data.agreement;
+          let admin = response.data.admin;
           let id = response.data.id;
           if (this.message == "Успешно") {
             localStorage.setItem("phone", phone);
             localStorage.setItem("id", id);
-            // localStorage.setItem("phone", "+79373639712");
+            localStorage.setItem("phone", "+79449445678");
             setTimeout(() => {
               this.message = "";
-              if (agreement) {
+              if (admin) {
                 this.$router.push({ name: "main" });
               } else {
-                this.$router.push({ name: "commercialSecret" });
+                if (agreement) {
+                  this.$router.push({ name: "main" });
+                } else {
+                  this.$router.push({ name: "commercialSecret" });
+                }
               }
             }, 2500);
           }
@@ -235,23 +240,5 @@ input::placeholder {
 .card:hover {
   cursor: auto;
   transform: none;
-}
-
-.msg {
-  padding: 10px 13px;
-  font-size: 16px;
-  line-height: 16px;
-  color: #fff;
-  border-radius: 15px;
-  width: fit-content;
-  margin: 0 auto;
-}
-
-.success {
-  background-color: #45ed0b;
-}
-
-.error {
-  background-color: #cf0032;
 }
 </style>

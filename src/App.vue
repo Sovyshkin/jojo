@@ -30,7 +30,10 @@ export default {
     v-if="
       $route.path != '/' &&
       $route.name != 'commercialSecret' &&
-      $route.name != 'employmentContract'
+      $route.name != 'employmentContract' &&
+      $route.name != 'upload_doc' &&
+      $route.name != 'scan_passport' &&
+      $route.name != 'scan_medcine'
     "
   />
 </template>
@@ -149,18 +152,18 @@ button::-moz-focus-inner {
 }
 
 .msg {
-  padding: 10px 13px;
+  padding: 15px 40px;
   font-size: 16px;
   line-height: 16px;
   color: #fff;
-  border-radius: 15px;
+  border-radius: 10px;
   width: fit-content;
   margin: 0 auto;
   text-align: center;
 }
 
 .success {
-  background-color: #45ed0b;
+  background-color: #36b20c;
 }
 
 .error {
@@ -188,6 +191,11 @@ button::-moz-focus-inner {
 .card::-webkit-scrollbar,
 .wrapper::-webkit-scrollbar {
   width: 0px; /* remove scrollbar space */
+}
+
+textarea {
+  max-width: 450px;
+  min-height: 100px;
 }
 @media (max-width: 540px) {
   .wrapper {

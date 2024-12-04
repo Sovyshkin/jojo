@@ -195,12 +195,6 @@ textarea {
   padding: 16px;
 }
 
-textarea {
-  max-width: 450px;
-  max-height: 300px;
-  min-height: 70px;
-}
-
 input::placeholder,
 textarea::placeholder {
   color: #a5a5a5;

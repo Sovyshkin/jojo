@@ -188,7 +188,6 @@ export default {
           v-model="desc"
           id="desc"
           cols="30"
-          rows="10"
           placeholder="Введите описание"
         ></textarea>
         <span class="group-value">Описание</span>
@@ -258,12 +257,6 @@ select {
   border: 1px solid black;
   border-radius: 8px;
   padding: 16px;
-}
-
-textarea {
-  max-width: 450px;
-  max-height: 300px;
-  min-height: 70px;
 }
 
 input::placeholder,

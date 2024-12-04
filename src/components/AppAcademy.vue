@@ -86,7 +86,7 @@ export default {
       </button>
     </div>
     <div class="block" v-for="(block, index) in blocks" :key="index">
-      <h2>{{ block.block }}</h2>
+      <h2>{{ index + 1 }}. {{ block.block }}</h2>
       <div class="lessons">
         <div
           class="group"

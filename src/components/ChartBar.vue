@@ -24,7 +24,7 @@ export default {
       chartOptions: {
         chart: {
           type: "rangeBar",
-          height: 600,
+          height: 500,
         },
         plotOptions: {
           bar: {

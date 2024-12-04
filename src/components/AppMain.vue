@@ -90,7 +90,7 @@ export default {
       try {
         let response = await axios.post(`/tasks/by_user`, {
           params: {
-            phone: "+79000000000",
+            phone: localStorage.getItem("phone"),
           },
         });
         console.log(response);
@@ -128,6 +128,20 @@ export default {
         console.log(err);
       }
     },
+    lowerText(text) {
+      if (typeof text !== "string") {
+        console.warn("Пожалуйста, передайте строку в качестве аргумента.");
+        return "";
+      }
+
+      // Проверяем, не пустая ли строка
+      if (text.length === 0) {
+        return "";
+      }
+
+      // Преобразуем всю строку в нижний регистр и заглавим первый символ
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    },
   },
   mounted() {
     this.check_verify();
@@ -147,10 +161,10 @@ export default {
           Создать задачу
         </button>
       </div>
-      <h1>KPI</h1>
+      <h1 class="kpi">KPI</h1>
       <div class="wrap-group">
         <div class="group" v-for="card in cards" :key="card.title">
-          <span>{{ Object.keys(card)[0] }}</span>
+          <span>{{ lowerText(Object.keys(card)[0]) }}</span>
           <div class="wrap-scale">
             <div
               class="scale"
@@ -161,7 +175,7 @@ export default {
         </div>
       </div>
       <h1>Задачи</h1>
-      <div class="tasks">
+      <div class="tasks" v-if="tasks.length > 0">
         <div class="task" v-for="(task, i) in tasks" :key="i">
           <input
             v-model="task.completed"
@@ -171,6 +185,9 @@ export default {
           />
           <label :for="task + i">{{ task.title }}</label>
         </div>
+      </div>
+      <div class="empty" v-else>
+        <span>Сегодня задач нет</span>
       </div>
       <h1>График</h1>
       <div class="wrap-bar" v-if="chartData">
@@ -196,6 +213,13 @@ export default {
 }
 h1 {
   font-weight: 500;
+  padding-top: 5px;
+  border-top: 1px solid black;
+}
+
+.kpi {
+  padding-top: 0;
+  border-top: none;
 }
 .wrap-scale {
   position: relative;
@@ -286,5 +310,21 @@ input[type="checkbox"]:focus {
   font-weight: 500;
   font-size: 16px;
   line-height: 16px;
+}
+
+.empty {
+  width: 100%;
+}
+
+.empty span {
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.tasks,
+.empty,
+.wrap-group {
+  padding-left: 20px;
 }
 </style>

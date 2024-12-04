@@ -23,7 +23,8 @@ export default {
         this.message = response.data.message;
         setTimeout(() => {
           this.message = "";
-        }, 2500);
+          this.$router.go(-1);
+        }, 1500);
       } catch (err) {
         console.log(err);
       }
@@ -122,12 +123,6 @@ textarea {
   border: 1px solid black;
   border-radius: 8px;
   padding: 16px;
-}
-
-textarea {
-  max-width: 450px;
-  max-height: 300px;
-  min-height: 70px;
 }
 
 input::placeholder,

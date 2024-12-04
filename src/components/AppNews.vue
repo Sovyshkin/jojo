@@ -53,6 +53,18 @@ export default {
         console.log(err);
       }
     },
+    async getImage(file) {
+      try {
+        let response = await axios.post(`/get_file`, {
+          params: {
+            file: file,
+          },
+        });
+        console.log(response);
+      } catch (err) {
+        console.log(err);
+      }
+    },
   },
   mounted() {
     this.check_verify();
@@ -70,7 +82,12 @@ export default {
     </div>
     <div class="cards">
       <div class="new" v-for="card in news" :key="card.id">
-        <img class="newImage" :src="card.img" v-if="card.file" alt="" />
+        <img
+          class="newImage"
+          :src="`http://103.74.94.235:5050/${card.file}`"
+          v-if="card.file"
+          alt=""
+        />
         <img class="no_photo" src="../assets/no_photo.png" v-else alt="" />
         <p v-html="card.description"></p>
         <button
@@ -115,6 +132,7 @@ export default {
   width: 300px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 7px;
   cursor: pointer;
   padding: 15px;
@@ -142,6 +160,8 @@ export default {
 
 .newImage {
   width: 250px;
+  height: 250px;
+  object-fit: cover;
   border-radius: 15px;
 }
 

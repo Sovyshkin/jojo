@@ -3,12 +3,28 @@ export default {
   name: "AppHeader",
   components: {},
   data() {
-    return {};
+    return {
+      active: "2",
+    };
   },
   methods: {
     goRoute(name) {
+      this.check_active(name);
       this.$router.push({ name });
     },
+
+    check_active(name) {
+      if (name == "academy") {
+        this.active = "1";
+      } else if (name == "main") {
+        this.active = "2";
+      } else if (name == "news") {
+        this.active = "3";
+      }
+    },
+  },
+  mounted() {
+    this.check_active(this.$route.name);
   },
 };
 </script>
@@ -23,13 +39,25 @@ export default {
           alt=""
         />
       </div>
-      <li @click="goRoute('academy')" class="item">
+      <li
+        @click="goRoute('academy')"
+        class="item"
+        :class="{ active: active == '1' }"
+      >
         <img src="../assets/edu.png" alt="" />
       </li>
-      <li @click="goRoute('main')" class="item">
+      <li
+        @click="goRoute('main')"
+        class="item"
+        :class="{ active: active == '2' }"
+      >
         <img src="../assets/main.png" alt="" />
       </li>
-      <li @click="goRoute(`news`)" class="item">
+      <li
+        @click="goRoute(`news`)"
+        class="item new"
+        :class="{ active: active == '3' }"
+      >
         <img src="../assets/new.png" alt="" />
       </li>
     </nav>
@@ -62,12 +90,13 @@ export default {
   transition: all 500ms ease;
 }
 
-.item:hover {
-  transform: translateY(-3px);
-}
-
 .item img {
   height: 33px;
+  min-width: 33px;
+}
+
+.active {
+  scale: 1.4;
 }
 
 @media (max-width: 540px) {

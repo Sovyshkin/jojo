@@ -28,11 +28,7 @@ export default {
         console.log(response);
         this.name = response.data.name;
         this.description = response.data.description;
-        let file = response.data.file;
-        if (file) {
-          this.file = atob(this.file);
-          console.log("Файл", this.file);
-        }
+        this.file = response.data.file;
       } catch (err) {
         console.log(err);
       } finally {
@@ -71,7 +67,9 @@ export default {
   <div class="wrapper" v-else>
     <h1>Академия jojo</h1>
     <h2>{{ name }}</h2>
-    <img :src="file" alt="" />
+    <div class="wrap-img">
+      <img :src="`http://103.74.94.235:5050/${file}`" alt="" />
+    </div>
     <p v-html="description"></p>
     <div class="wrap-btns">
       <button class="btn" @click="$router.go(-1)">Вернуться</button>
@@ -165,5 +163,10 @@ label {
   font-size: 15px;
   line-height: 18px;
   font-weight: 500;
+}
+img {
+  width: 100%;
+  height: 500px;
+  object-fit: contain;
 }
 </style>
