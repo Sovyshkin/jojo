@@ -145,61 +145,56 @@ export default {
 
 <template>
   <div class="wrapper">
-    <div class="card">
-      <h1>Отсканируйте свой паспорт</h1>
-      <div class="group-file">
-        <input type="file" id="file" @change="handleFileUpload($event, 1)" />
-        <label class="select-img" for="file">
-          <img class="photo" src="../assets/photo.png" alt="" />
-          <span>Добавить</span>
-        </label>
-      </div>
-      <div v-if="isImage" class="image-container">
-        <img :src="imageUrl" alt="Uploaded Image" />
-      </div>
+    <h1>Отсканируйте свой паспорт</h1>
+    <div class="group-file">
+      <input type="file" id="file" @change="handleFileUpload($event, 1)" />
+      <label class="select-img" for="file">
+        <img class="photo" src="../assets/photo.png" alt="" />
+        <span>Добавить</span>
+      </label>
+    </div>
+    <div v-if="isImage" class="image-container">
+      <img :src="imageUrl" alt="Uploaded Image" />
+    </div>
 
-      <div v-if="!isImage && fileName" class="file-container">
-        <img src="../assets/file.png" alt="" />
-        <span>{{ fileName }}</span>
-        <br />
-        <small>{{ fileSize }}</small>
-      </div>
-      <p>1. Разворот страниц с личными данными: стр. 2-3</p>
-      <div class="group-file">
-        <input type="file" id="file2" @change="handleFileUpload($event, 2)" />
-        <label class="select-img" for="file2">
-          <img class="photo" src="../assets/photo.png" alt="" />
-          <span>Добавить</span>
-        </label>
-      </div>
-      <p>2. Регистрация: стр. 4-5, 6-12, если заполнены</p>
-      <div v-if="isImage2" class="image-container">
-        <img :src="imageUrl2" alt="Uploaded Image" />
-      </div>
+    <div v-if="!isImage && fileName" class="file-container">
+      <img src="../assets/file.png" alt="" />
+      <span>{{ fileName }}</span>
+      <br />
+      <small>{{ fileSize }}</small>
+    </div>
+    <p>1. Разворот страниц с личными данными: стр. 2-3</p>
+    <div class="group-file">
+      <input type="file" id="file2" @change="handleFileUpload($event, 2)" />
+      <label class="select-img" for="file2">
+        <img class="photo" src="../assets/photo.png" alt="" />
+        <span>Добавить</span>
+      </label>
+    </div>
+    <p>2. Регистрация: стр. 4-5, 6-12, если заполнены</p>
+    <div v-if="isImage2" class="image-container">
+      <img :src="imageUrl2" alt="Uploaded Image" />
+    </div>
 
-      <div v-if="!isImage2 && fileName2" class="file-container">
-        <img src="../assets/file.png" alt="" />
-        <span>{{ fileName2 }}</span>
-        <br />
-        <small>{{ fileSize2 }}</small>
-      </div>
-      <div class="wrap-btns">
-        <button class="btn" @click="save()">Продолжить</button>
-      </div>
+    <div v-if="!isImage2 && fileName2" class="file-container">
+      <img src="../assets/file.png" alt="" />
+      <span>{{ fileName2 }}</span>
+      <br />
+      <small>{{ fileSize2 }}</small>
+    </div>
+    <div class="wrap-btns">
+      <button class="btn" @click="save()">Продолжить</button>
     </div>
   </div>
 </template>
 <style scoped>
 .wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card {
-  max-width: 1000px;
-  display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  height: none;
 }
 
 h1 {
