@@ -1,10 +1,10 @@
 <script>
 export default {
-  name: "AppHeader",
+  name: "AppNav",
   components: {},
   data() {
     return {
-      active: "2",
+      active: "",
     };
   },
   methods: {

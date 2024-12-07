@@ -16,6 +16,7 @@ export default {
       isImage2: false,
       fileName2: "",
       fileSize2: "",
+      user_id: "",
     };
   },
   methods: {
@@ -106,33 +107,61 @@ export default {
 
     async save() {
       try {
-        const formData = new FormData();
-        formData.append("files", this.fileObject);
-        formData.append("phone", localStorage.getItem("phone"));
-        formData.append("name_doc", "passport_first");
+        this.user_id = localStorage.getItem("id");
+        if (this.fileObject) {
+          const formData = new FormData();
+          formData.append("files", this.fileObject);
+          formData.append("phone", localStorage.getItem("phone"));
+          formData.append("name_doc", "passport_first");
 
-        console.log(formData);
-        let response = await axios.post("/upload_document", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log(response);
-        const formData2 = new FormData();
-        formData2.append("files", this.fileObject2);
-        formData2.append("phone", localStorage.getItem("phone"));
-        formData2.append("name_doc", "passport_second");
+          console.log(formData);
+          let response = await axios.post("/upload_document", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          console.log(response);
+        } else {
+          let response = await axios.post(`/new_task`, {
+            params: {
+              title:
+                "Прикрепите разворот страниц паспорта с личными данными: стр. 2-3",
+              date: new Date(),
+              user_id: this.user_id,
+            },
+          });
+          console.log(response);
+        }
+        if (this.fileObject2) {
+          const formData2 = new FormData();
+          formData2.append("files", this.fileObject2);
+          formData2.append("phone", localStorage.getItem("phone"));
+          formData2.append("name_doc", "passport_second");
 
-        console.log(formData2);
-        let response2 = await axios.post("/upload_document", formData2, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log(response2);
-        let status2 = response2.data.status;
-        if (status2 == "200") {
-          this.$router.push({ name: "scan_medcine" });
+          console.log(formData2);
+          let response2 = await axios.post("/upload_document", formData2, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          console.log(response2);
+          let status2 = response2.data.status;
+          if (status2 == "200") {
+            this.$router.push({ name: "scan_medcine" });
+          }
+        } else {
+          let response = await axios.post(`/new_task`, {
+            params: {
+              title: "Прикрепите регистрацию: стр. 4-5, 6-12, если заполнены",
+              date: new Date(),
+              user_id: this.user_id,
+            },
+          });
+          console.log(response);
+          this.message = response.data.message;
+          if (this.message == "Успешно") {
+            this.$router.push({ name: "scan_medcine" });
+          }
         }
       } catch (err) {
         console.log(err);
@@ -192,7 +221,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 1000px;
+  max-width: 500px;
   margin: 0 auto;
   height: none;
 }
@@ -202,6 +231,7 @@ h1 {
   font-size: 23px;
   line-height: 28px;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .wrap-btns {
@@ -209,6 +239,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .btn {
@@ -281,6 +312,7 @@ label {
 .image-container {
   margin: 0 auto;
   max-width: 400px;
+  height: 250px;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -295,5 +327,17 @@ label {
 
 .photo {
   width: 57px;
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 450px) {
+  .wrapper {
+    max-width: 300px;
+  }
 }
 </style>

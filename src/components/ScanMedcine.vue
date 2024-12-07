@@ -59,21 +59,37 @@ export default {
     },
     async save() {
       try {
-        const formData = new FormData();
-        formData.append("files", this.fileObject);
-        formData.append("phone", localStorage.getItem("phone"));
-        formData.append("name_doc", "med_book");
+        this.user_id = localStorage.getItem("id");
+        if (this.fileObject) {
+          const formData = new FormData();
+          formData.append("files", this.fileObject);
+          formData.append("phone", localStorage.getItem("phone"));
+          formData.append("name_doc", "med_book");
 
-        console.log(formData);
-        let response = await axios.post("/upload_document", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log(response);
-        let status = response.data.status;
-        if (status == "200") {
-          this.$router.push({ name: "main" });
+          console.log(formData);
+          let response = await axios.post("/upload_document", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          console.log(response);
+          let status = response.data.status;
+          if (status == "200") {
+            this.$router.push({ name: "main" });
+          }
+        } else {
+          let response = await axios.post(`/new_task`, {
+            params: {
+              title: "Отсканируйте медицинскую книжку",
+              date: new Date(),
+              user_id: this.user_id,
+            },
+          });
+          console.log(response);
+          this.message = response.data.message;
+          if (this.message == "Успешно") {
+            this.$router.push({ name: "main" });
+          }
         }
       } catch (err) {
         console.log(err);
@@ -86,42 +102,36 @@ export default {
 
 <template>
   <div class="wrapper">
-    <div class="card">
-      <h1>Отсканируйте медицинскую книжку</h1>
-      <div class="group-file">
-        <input type="file" id="file" @change="handleFileUpload" />
-        <label class="select-img" for="file">
-          <img class="photo" src="../assets/photo.png" alt="" />
-          <span>Добавить</span>
-        </label>
-      </div>
-      <div v-if="isImage" class="image-container">
-        <img :src="imageUrl" alt="Uploaded Image" />
-      </div>
+    <h1>Отсканируйте медицинскую книжку</h1>
+    <div class="group-file">
+      <input type="file" id="file" @change="handleFileUpload" />
+      <label class="select-img" for="file">
+        <img class="photo" src="../assets/photo.png" alt="" />
+        <span>Добавить</span>
+      </label>
+    </div>
+    <div v-if="isImage" class="image-container">
+      <img :src="imageUrl" alt="Uploaded Image" />
+    </div>
 
-      <div v-if="!isImage && fileName" class="file-container">
-        <img src="../assets/file.png" alt="" />
-        <span>{{ fileName }}</span>
-        <br />
-        <small>{{ fileSize }}</small>
-      </div>
-      <div class="wrap-btns">
-        <button class="btn" @click="save()">Продолжить</button>
-      </div>
+    <div v-if="!isImage && fileName" class="file-container">
+      <img src="../assets/file.png" alt="" />
+      <span>{{ fileName }}</span>
+      <br />
+      <small>{{ fileSize }}</small>
+    </div>
+    <div class="wrap-btns">
+      <button class="btn" @click="save()">Продолжить</button>
     </div>
   </div>
 </template>
 <style scoped>
 .wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card {
-  max-width: 1000px;
-  display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -129,6 +139,7 @@ h1 {
   font-size: 23px;
   line-height: 28px;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .wrap-btns {
@@ -136,6 +147,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 30px;
 }
 
 .btn {

@@ -87,49 +87,43 @@ export default {
 
 <template>
   <div class="wrapper">
-    <div class="card">
-      <h1>Загрузка документа</h1>
-      <div class="group">
-        <input
-          v-model="title"
-          type="text"
-          required
-          name="title"
-          placeholder="Введите название"
-        />
-        <span class="group-value">Название</span>
-      </div>
-      <div class="group-file">
-        <input type="file" id="file" @change="handleFileUpload" />
-        <label class="select-img" for="file">Прикрепить файл</label>
-      </div>
-      <div v-if="isImage" class="image-container">
-        <img :src="imageUrl" alt="Uploaded Image" />
-      </div>
+    <h1>Загрузка документа</h1>
+    <div class="group">
+      <input
+        v-model="title"
+        type="text"
+        required
+        name="title"
+        placeholder="Введите название"
+      />
+      <span class="group-value">Название</span>
+    </div>
+    <div class="group-file">
+      <input type="file" id="file" @change="handleFileUpload" />
+      <label class="select-img" for="file">Прикрепить файл</label>
+    </div>
+    <div v-if="isImage" class="image-container">
+      <img :src="imageUrl" alt="Uploaded Image" />
+    </div>
 
-      <div v-if="!isImage && fileName" class="file-container">
-        <img src="../assets/file.png" alt="" />
-        <span>{{ fileName }}</span>
-        <br />
-        <small>{{ fileSize }}</small>
-      </div>
-      <div class="wrap-btns">
-        <button class="btn" @click="save()">Сохранить</button>
-      </div>
+    <div v-if="!isImage && fileName" class="file-container">
+      <img src="../assets/file.png" alt="" />
+      <span>{{ fileName }}</span>
+      <br />
+      <small>{{ fileSize }}</small>
+    </div>
+    <div class="wrap-btns">
+      <button class="btn" @click="save()">Сохранить</button>
     </div>
   </div>
 </template>
 <style scoped>
 .wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card {
-  max-width: 1000px;
-  display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -137,6 +131,7 @@ h1 {
   font-size: 23px;
   line-height: 28px;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .wrap-btns {
@@ -144,6 +139,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 30px;
 }
 
 .btn {
@@ -170,6 +166,8 @@ textarea::placeholder {
   line-height: 19.12px;
 }
 .group {
+  margin: 0 auto;
+  width: 80%;
   position: relative;
 }
 
@@ -198,6 +196,8 @@ input[type="file"] {
   justify-content: center;
   border: 1.9px dashed black;
   border-radius: 8px;
+  margin: 0 auto;
+  width: 80%;
 }
 
 label {

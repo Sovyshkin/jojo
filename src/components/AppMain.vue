@@ -74,6 +74,8 @@ export default {
         },
       ],
       phone: "",
+      passport: false,
+      medcine: false,
     };
   },
   methods: {
@@ -95,6 +97,26 @@ export default {
         });
         console.log(response);
         this.tasks = response.data.tasks;
+        this.tasks.forEach((item) => {
+          if (
+            item.title ==
+              "Прикрепите регистрацию: стр. 4-5, 6-12, если заполнены" &&
+            !item.completed
+          ) {
+            this.passport = true;
+          } else if (
+            item.title ==
+              "Прикрепите разворот страниц паспорта с личными данными: стр. 2-3" &&
+            !item.completed
+          ) {
+            this.passport = true;
+          } else if (
+            item.title == "Отсканируйте медицинскую книжку" &&
+            !item.completed
+          ) {
+            this.medcine = true;
+          }
+        });
         let data = response.data.schedules;
         if (data) {
           this.chartData = Array.from(data);
@@ -117,7 +139,7 @@ export default {
 
     async changeComp(id, value) {
       try {
-        let response = await axios.post(`/set_completed`, {
+        let response = await axios.post(`/tasks/set_completed`, {
           params: {
             id,
             completed: value,
@@ -159,6 +181,22 @@ export default {
         </button>
         <button @click="$router.push({ name: 'create_task' })" class="btn">
           Создать задачу
+        </button>
+      </div>
+      <div class="wrap-btns" v-if="passport || medcine">
+        <button
+          class="btn"
+          v-if="passport"
+          @click="$router.push({ name: 'scan_passport' })"
+        >
+          Прикрепить паспорт
+        </button>
+        <button
+          class="btn"
+          v-if="medcine"
+          @click="$router.push({ name: 'scan_medcine' })"
+        >
+          Прикрепить мед. книжку
         </button>
       </div>
       <h1 class="kpi">KPI</h1>
@@ -223,7 +261,7 @@ h1 {
 }
 .wrap-scale {
   position: relative;
-  width: 200px;
+  max-width: 200px;
   border-radius: 10px;
   height: 10px;
   overflow: hidden;
@@ -241,32 +279,32 @@ h1 {
 .wrap-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 15px;
 }
 
 .group {
-  flex: 33%;
+  width: 47%;
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 .percent {
-  width: 200px;
+  max-width: 200px;
   text-align: center;
 }
 
 .tasks {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
 
 .task {
-  flex: 30%;
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 input[type="checkbox"] {
   /* Базовый стиль чекбокса */
   appearance: none;
@@ -294,6 +332,7 @@ input[type="checkbox"]:focus {
 
 .task label {
   cursor: pointer;
+  width: 97%;
 }
 .wrap-btns {
   width: 100%;
@@ -326,5 +365,12 @@ input[type="checkbox"]:focus {
 .empty,
 .wrap-group {
   padding-left: 20px;
+}
+
+@media (max-width: 600px) {
+  .btn {
+    font-size: 13px;
+    line-height: 13px;
+  }
 }
 </style>

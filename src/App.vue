@@ -31,9 +31,7 @@ export default {
       $route.path != '/' &&
       $route.name != 'commercialSecret' &&
       $route.name != 'employmentContract' &&
-      $route.name != 'upload_doc' &&
-      $route.name != 'scan_passport' &&
-      $route.name != 'scan_medcine'
+      $route.name != 'upload_doc'
     "
   />
 </template>
@@ -91,6 +89,7 @@ img,
 svg {
   max-width: 100%;
   height: auto;
+  max-height: 250px;
 }
 
 address {
