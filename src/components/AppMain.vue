@@ -121,6 +121,7 @@ export default {
         if (data) {
           this.chartData = Array.from(data);
         }
+        this.tasks = [];
       } catch (err) {
         console.log(err);
       }
@@ -353,12 +354,6 @@ input[type="checkbox"]:focus {
 
 .empty {
   width: 100%;
-}
-
-.empty span {
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 18px;
 }
 
 .tasks,

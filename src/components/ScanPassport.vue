@@ -314,7 +314,6 @@ label {
   max-width: 400px;
   height: 250px;
   border-radius: 8px;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
