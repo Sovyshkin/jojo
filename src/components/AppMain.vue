@@ -121,7 +121,6 @@ export default {
         if (data) {
           this.chartData = Array.from(data);
         }
-        this.tasks = [];
       } catch (err) {
         console.log(err);
       }
