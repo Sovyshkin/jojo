@@ -66,10 +66,43 @@ export default {
         console.log(err);
       }
     },
+
+    check_view() {
+      try {
+        for (let i = 0; i < this.blocks.length; i++) {
+          let block = this.blocks[i];
+          for (let j = 0; j < block.trains.length; j++) {
+            let train = block.trains[j];
+            if (!train.completed) {
+              this.blocks[i].trains[j].view = true;
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    openLesson(id, view, completed) {
+      try {
+        if (view || completed) {
+          this.$router.push({ name: "lesson", query: { id } });
+        } else {
+          this.message = "Сначала пройдите предыдущий урок";
+          setTimeout(() => {
+            this.message = "";
+          }, 2500);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
   },
-  mounted() {
+  async mounted() {
     this.check_verify();
-    this.load_info();
+    await this.load_info();
+    this.check_view();
   },
 };
 </script>
@@ -95,7 +128,7 @@ export default {
         >
           <div
             class="lesson"
-            @click="$router.push({ name: 'lesson', query: { id: lesson.id } })"
+            @click="openLesson(lesson.id, lesson.view, lesson.completed)"
             :class="{ completed: lesson.completed }"
           >
             {{ lesson.title }}
@@ -129,6 +162,7 @@ export default {
       class="msg"
       :class="{
         success: this.message == 'Успешно',
+        info: this.message == 'Сначала пройдите предыдущий урок',
         error: this.message != 'Успешно',
       }"
       v-if="message"
@@ -223,5 +257,10 @@ h2 {
 .gal {
   width: 15px;
   height: 15px;
+}
+
+.info {
+  background-color: #ffcc00;
+  color: #000;
 }
 </style>

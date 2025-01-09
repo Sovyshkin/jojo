@@ -251,6 +251,7 @@ export default {
 }
 h1 {
   font-weight: 500;
+  font-size: 25px;
   padding-top: 5px;
   border-top: 1px solid black;
 }

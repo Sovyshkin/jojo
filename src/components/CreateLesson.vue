@@ -4,7 +4,9 @@ export default {
   name: "CreateLesson",
   data() {
     return {
+      img: "",
       title: "",
+      video: "",
       desc: "",
       block: "",
       fileObject: null,
@@ -57,6 +59,7 @@ export default {
         const formData = new FormData();
         formData.append("files", this.fileObject);
         formData.append("name", this.title);
+        formData.append("video", this.video);
         formData.append("description", this.desc);
         formData.append("block", this.block);
 
@@ -78,6 +81,37 @@ export default {
         console.log(err);
       }
     },
+
+    async edit() {
+      try {
+        this.saveContent();
+        const formData = new FormData();
+        formData.append("files", this.fileObject);
+        formData.append("name", this.title);
+        formData.append("video", this.video);
+        formData.append("description", this.desc);
+        formData.append("block", this.block);
+        formData.append("id", this.id);
+
+        console.log(formData);
+        let response = await axios.post(`/update_train`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log(response);
+        this.message = response.data.message;
+        if (this.message == "Успешно") {
+          setTimeout(() => {
+            this.message = "";
+            this.$router.go(-1);
+          }, 2500);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
     check_verify() {
       try {
         let phone = localStorage.getItem("phone");
@@ -105,13 +139,16 @@ export default {
         if (this.id) {
           let response = await axios.post(`/trainings/by_id`, {
             params: {
-              id: this.id,
+              training_id: this.id,
+              user_id: localStorage.getItem("id"),
             },
           });
           console.log(response);
+          this.img = response.data.file;
           this.block = response.data.block;
           this.title = response.data.name;
           this.desc = response.data.description;
+          this.video = response.data.video_url;
         }
       } catch (err) {
         console.log(err);
@@ -148,7 +185,8 @@ export default {
 <template>
   <div class="wrapper">
     <div class="card">
-      <h1>Загрузка нового урока</h1>
+      <h1 v-if="!id">Загрузка нового урока</h1>
+      <h1 v-else>Редактирование урока</h1>
       <div class="group-file">
         <input
           ref="fileInput"
@@ -161,8 +199,9 @@ export default {
       </div>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       <!-- Отображение ошибок -->
-      <div v-if="isImage" class="image-container">
-        <img :src="imageUrl" alt="Uploaded Image" />
+      <div v-if="isImage || id" class="image-container">
+        <img v-if="id" :src="`http://103.74.94.235:5050/${img}`" alt="" />
+        <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" />
       </div>
       <div class="group">
         <select name="" id="" v-model="block">
@@ -181,6 +220,25 @@ export default {
           placeholder="Введите название"
         />
         <span class="group-value">Название</span>
+      </div>
+      <div class="group">
+        <input
+          v-model="video"
+          type="text"
+          required
+          name="title"
+          placeholder="Вставьте ссылку на видео"
+        />
+        <span class="group-value">Ссылка</span>
+      </div>
+      <div class="video" v-if="video">
+        <iframe
+          :src="video"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture;"
+          frameborder="0"
+          allowfullscreen
+          class="video"
+        ></iframe>
       </div>
       <div class="group">
         <textarea
@@ -211,9 +269,15 @@ export default {
 </template>
 
 <style scoped>
+.video {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  min-height: 200px;
+}
 .wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 .card {
@@ -222,9 +286,6 @@ export default {
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  height: 90vh;
-  overflow-y: scroll;
-  overflow-x: hidden;
 }
 
 h1 {
@@ -239,6 +300,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
 }
 
 .btn {
@@ -308,13 +370,23 @@ label {
   border-radius: 8px;
   overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+}
+
+img {
+  border-radius: 8px;
 }
 
 .error-message {
   color: red;
   font-size: 14px;
   text-align: center;
+}
+
+@media (max-height: 900px) {
+  .wrapper {
+    align-items: flex-start;
+  }
 }
 </style>

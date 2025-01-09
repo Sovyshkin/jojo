@@ -6,26 +6,7 @@ export default {
   components: { AppLoader },
   data() {
     return {
-      news: [
-        {
-          id: 1,
-          title: "Название",
-          desc: "Описание",
-          img: "card1.png",
-        },
-        {
-          id: 2,
-          title: "Название",
-          desc: "Описание",
-          img: "card2.png",
-        },
-        {
-          id: 3,
-          title: "Название",
-          desc: "Описание",
-          img: "card3.png",
-        },
-      ],
+      news: [],
       isLoading: false,
       phone: "",
     };

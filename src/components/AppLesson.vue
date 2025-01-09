@@ -29,6 +29,7 @@ export default {
         this.name = response.data.name;
         this.description = response.data.description;
         this.file = response.data.file;
+        this.video = response.data.video_url;
       } catch (err) {
         console.log(err);
       } finally {
@@ -67,7 +68,16 @@ export default {
   <div class="wrapper" v-else>
     <h1>Академия jojo</h1>
     <h2>{{ name }}</h2>
-    <div class="wrap-img">
+    <div class="wrap-video" v-if="video">
+      <iframe
+        :src="video"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture;"
+        frameborder="0"
+        allowfullscreen
+        class="video"
+      ></iframe>
+    </div>
+    <div class="wrap-img" v-if="file != 'None'">
       <img :src="`http://103.74.94.235:5050/${file}`" alt="" />
     </div>
     <p v-html="description"></p>
@@ -168,5 +178,23 @@ img {
   width: 100%;
   height: 500px;
   object-fit: contain;
+}
+
+.wrap-video {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.video {
+  width: 80%;
+  min-height: 250px;
+  border-radius: 10px;
+}
+
+@media (max-width: 530px) {
+  .video {
+    width: 95%;
+  }
 }
 </style>
