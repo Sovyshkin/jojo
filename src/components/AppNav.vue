@@ -75,6 +75,7 @@ export default {
   bottom: 0;
   z-index: 4;
   height: 10vh;
+  background-color: #fff;
 }
 
 .group {

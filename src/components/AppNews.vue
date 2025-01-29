@@ -113,7 +113,6 @@ export default {
   width: 300px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: 7px;
   cursor: pointer;
   padding: 15px;
@@ -140,9 +139,8 @@ export default {
 }
 
 .newImage {
-  width: 250px;
-  height: 250px;
-  object-fit: cover;
+  max-width: 250px;
+  max-height: 250px;
   border-radius: 15px;
 }
 
