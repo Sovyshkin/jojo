@@ -35,7 +35,6 @@ export default {
           if (this.message == "Успешно") {
             localStorage.setItem("phone", phone);
             localStorage.setItem("id", id);
-            localStorage.setItem("phone", "+79449445678");
             setTimeout(() => {
               this.message = "";
               if (admin) {

@@ -73,7 +73,7 @@ export default {
   border-top: 2px solid black;
   position: absolute;
   bottom: 0;
-  z-index: 4;
+  z-index: 999;
   height: 10vh;
   background-color: #fff;
 }
