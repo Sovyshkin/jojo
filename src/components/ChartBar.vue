@@ -17,14 +17,17 @@ export default {
     apexchart: VueApexCharts,
   },
   props: {
-    scheduleData: Array,
+    scheduleData: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
       chartOptions: {
         chart: {
           type: "rangeBar",
-          height: 500,
+          height: 700,
         },
         plotOptions: {
           bar: {
@@ -56,9 +59,9 @@ export default {
           },
         },
         yaxis: {
-          min: 9,
-          max: 19,
-          tickAmount: 10,
+          min: 8, // Начало с 0:00
+          max: 24, // Конец в 24:00
+          tickAmount: 16, // Количество делений
           title: {
             text: "",
             style: {
@@ -83,30 +86,54 @@ export default {
   },
   computed: {
     chartSeries() {
-      console.log("scheduleData:", this.scheduleData); // Для отладки
-      if (Array.isArray(this.scheduleData)) {
-        // Проверяем, массив ли это
-        const dayMapping = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-        const seriesData = this.scheduleData.map((entry) => {
-          const startTime = new Date(entry.dateFrom).getHours();
-          const endTime = new Date(entry.dateTo).getHours();
-          const dayOfWeek = dayMapping[new Date(entry.dateFrom).getDay()];
-          return { x: dayOfWeek, y: [startTime, endTime] };
-        });
+      try {
+        console.log("scheduleData:", this.scheduleData); // Для отладки
 
-        return [
-          {
-            name: "Рабочие часы",
-            data: seriesData,
-          },
-        ];
-      } else {
-        console.error("scheduleData is not an array:", this.scheduleData);
+        if (this.scheduleData && this.scheduleData.length > 0) {
+          const dayMapping = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+          const seriesData = this.scheduleData.map((entry) => {
+            const startTime = new Date(entry.dateFrom).getHours(); // Локальное время
+            let endTime = new Date(entry.dateTo).getHours(); // Локальное время
+
+            // Если endTime равно 0 (00:00), заменяем на 24
+            if (endTime === 0) {
+              endTime = 24;
+            }
+
+            const dayOfWeek = dayMapping[new Date(entry.dateFrom).getDay()]; // День недели
+
+            console.log("entry:", entry);
+            console.log("startTime:", startTime);
+            console.log("endTime:", endTime);
+            console.log("dayOfWeek:", dayOfWeek);
+
+            return {
+              x: dayOfWeek,
+              y: [startTime, endTime],
+            };
+          });
+
+          console.log("seriesData:", seriesData); // Отладка
+
+          return [
+            {
+              name: "Рабочие часы",
+              data: seriesData,
+            },
+          ];
+        } else {
+          console.error("scheduleData is empty or not provided");
+          return [];
+        }
+      } catch (err) {
+        console.error("Error in chartSeries computation:", err);
         return [];
       }
     },
   },
-  mounted() {},
+  mounted() {
+    console.log("Props scheduleData:", this.scheduleData); // Проверка передачи данных
+  },
 };
 </script>
 

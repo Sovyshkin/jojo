@@ -120,6 +120,7 @@ export default {
         let data = response.data.schedules;
         if (data) {
           this.chartData = Array.from(data);
+          console.log("data", this.chartData);
         }
       } catch (err) {
         console.log(err);
@@ -228,7 +229,7 @@ export default {
         <span>Сегодня задач нет</span>
       </div>
       <h1>График</h1>
-      <div class="wrap-bar" v-if="chartData">
+      <div class="wrap-bar" v-if="chartData && chartData.length">
         <ChartBar :scheduleData="chartData" />
       </div>
     </div>
