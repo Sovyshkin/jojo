@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="chart-container">
     <apexchart
       type="rangeBar"
       :options="chartOptions"
@@ -27,7 +27,11 @@ export default {
       chartOptions: {
         chart: {
           type: "rangeBar",
-          height: 700,
+          height: 500, // Уменьшаем высоту для мобильных устройств
+          width: "100%",
+          toolbar: {
+            show: false, // Скрываем тулбар на мобильных устройствах
+          },
         },
         plotOptions: {
           bar: {
@@ -49,27 +53,30 @@ export default {
           title: {
             text: "",
             style: {
-              fontSize: "14px",
+              fontSize: "12px", // Уменьшаем размер шрифта
             },
           },
           labels: {
             style: {
-              fontSize: "12px",
+              fontSize: "10px", // Уменьшаем размер шрифта
             },
           },
         },
         yaxis: {
-          min: 8, // Начало с 0:00
+          min: 8, // Начало с 8:00
           max: 24, // Конец в 24:00
-          tickAmount: 16, // Количество делений
+          tickAmount: 16, // Уменьшаем количество делений для мобильных устройств
           title: {
             text: "",
             style: {
-              fontSize: "14px",
+              fontSize: "12px", // Уменьшаем размер шрифта
             },
           },
           labels: {
             formatter: (value) => `${value}:00`,
+            style: {
+              fontSize: "10px", // Уменьшаем размер шрифта
+            },
           },
         },
         tooltip: {
@@ -81,6 +88,33 @@ export default {
         dataLabels: {
           enabled: false,
         },
+        responsive: [
+          {
+            breakpoint: 480, // Настройки для экранов меньше 480px
+            options: {
+              chart: {
+                height: 350, // Уменьшаем высоту для мобильных устройств
+              },
+              xaxis: {
+                labels: {
+                  style: {
+                    fontSize: "10px", // Уменьшаем размер шрифта
+                  },
+                },
+              },
+              yaxis: {
+                min: 8, // Начало с 8:00
+                max: 24, // Конец в 24:00
+                tickAmount: 16, // Уменьшаем количество делений для мобильных устройств
+                labels: {
+                  style: {
+                    fontSize: "10px", // Уменьшаем размер шрифта
+                  },
+                },
+              },
+            },
+          },
+        ],
       },
     };
   },
@@ -138,8 +172,13 @@ export default {
 </script>
 
 <style scoped>
-div {
-  max-width: 1200px;
-  margin: 0 auto;
+.apexcharts-canvas {
+  min-height: 300px !important;
+  width: 100% !important;
+}
+
+.chart-container {
+  width: 100%;
+  overflow-x: auto;
 }
 </style>
