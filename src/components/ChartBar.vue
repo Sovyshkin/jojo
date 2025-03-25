@@ -126,15 +126,15 @@ export default {
         if (this.scheduleData && this.scheduleData.length > 0) {
           const dayMapping = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
           const seriesData = this.scheduleData.map((entry) => {
-            const startTime = new Date(entry.dateFrom).getHours(); // Локальное время
-            let endTime = new Date(entry.dateTo).getHours(); // Локальное время
+            const startTime = new Date(entry.date_from).getHours(); // Локальное время
+            let endTime = new Date(entry.date_to).getHours(); // Локальное время
 
             // Если endTime равно 0 (00:00), заменяем на 24
             if (endTime === 0) {
               endTime = 24;
             }
 
-            const dayOfWeek = dayMapping[new Date(entry.dateFrom).getDay()]; // День недели
+            const dayOfWeek = dayMapping[new Date(entry.date_from).getDay()]; // День недели
 
             console.log("entry:", entry);
             console.log("startTime:", startTime);

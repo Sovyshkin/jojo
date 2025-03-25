@@ -119,7 +119,7 @@ export default {
         });
         let data = response.data.schedules;
         if (data) {
-          this.chartData = Array.from(data);
+          this.chartData = Array.from(data.entries);
           console.log("data", this.chartData);
         }
       } catch (err) {
