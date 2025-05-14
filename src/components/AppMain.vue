@@ -76,6 +76,8 @@ export default {
       phone: "",
       passport: false,
       medcine: false,
+      hours_working: 0,
+      give_me_my_money: 0
     };
   },
   methods: {
@@ -118,6 +120,8 @@ export default {
           }
         });
         let data = response.data.schedules;
+        this.give_me_my_money = data.give_me_my_money
+        this.hours_working = Math.round(data.hours_working)
         if (data) {
           this.chartData = Array.from(data.entries);
           console.log("data", this.chartData);
@@ -229,6 +233,16 @@ export default {
         <span>Сегодня задач нет</span>
       </div>
       <h1>График</h1>
+      <div class="fields">
+        <div class="field">
+          <span class="field-item">Отработано:</span>
+          <span class="field-value">{{ hours_working }} ч.</span>
+        </div>
+        <div class="field">
+          <span class="field-item">Заработано:</span>
+          <span class="field-value">{{ give_me_my_money }} руб.</span>
+        </div>
+      </div>
       <div class="wrap-bar" v-if="chartData && chartData.length">
         <ChartBar :scheduleData="chartData" />
       </div>
@@ -359,8 +373,24 @@ input[type="checkbox"]:focus {
 
 .tasks,
 .empty,
-.wrap-group {
+.wrap-group, .fields {
   padding-left: 20px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.field-value {
+  font-weight: 600;
 }
 
 @media (max-width: 600px) {
