@@ -18,9 +18,13 @@ export default {
   },
   props: {
     scheduleData: {
-      type: Array,
-      required: true,
-    },
+    type: Array,
+    required: true,
+    validator: (value) => {
+      return Array.isArray(value) && 
+        value.every(item => item.date_from && item.date_to);
+    }
+  }
   },
   data() {
     return {

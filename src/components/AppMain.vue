@@ -1,9 +1,10 @@
 <script>
 import axios from "axios";
 import ChartBar from "./ChartBar.vue";
+import DataToggler from "./DataToggler.vue";
 export default {
   name: "AppMain",
-  components: { ChartBar },
+  components: { ChartBar, DataToggler },
   data() {
     return {
       cards: [],
@@ -76,9 +77,28 @@ export default {
       phone: "",
       passport: false,
       medcine: false,
+      currentMonthType: "now", // "now" или "previous"
       hours_working: 0,
-      give_me_my_money: 0
+      hours_working_Previous: 0,
+      give_me_my_money: 0,
+      give_me_my_money_Previous: 0,
+      chartDataNow: [], // Все данные за текущий месяц
+      filteredChartData: [], // Данные за выбранную неделю
+      currentWeek: { start: null, end: null },
+      earliestDate: null,
     };
+  },
+  computed: {
+    currentHours() {
+      return this.currentMonthType === "now"
+        ? this.hours_working
+        : this.hours_working_Previous;
+    },
+    currentMoney() {
+      return this.currentMonthType === "now"
+        ? this.give_me_my_money
+        : this.give_me_my_money_Previous;
+    },
   },
   methods: {
     async load_kpi() {
@@ -90,45 +110,123 @@ export default {
         console.log(err);
       }
     },
+
     async load_info() {
       try {
-        let response = await axios.post(`/tasks/by_user`, {
-          params: {
-            phone: localStorage.getItem("phone"),
-          },
+        const response = await axios.post(`/tasks/by_user`, {
+          params: { phone: localStorage.getItem("phone") },
         });
-        console.log(response);
-        this.tasks = response.data.tasks;
-        this.tasks.forEach((item) => {
-          if (
-            item.title ==
-              "Прикрепите регистрацию: стр. 4-5, 6-12, если заполнены" &&
-            !item.completed
-          ) {
-            this.passport = true;
-          } else if (
-            item.title ==
-              "Прикрепите разворот страниц паспорта с личными данными: стр. 2-3" &&
-            !item.completed
-          ) {
-            this.passport = true;
-          } else if (
-            item.title == "Отсканируйте медицинскую книжку" &&
-            !item.completed
-          ) {
-            this.medcine = true;
-          }
-        });
-        let data = response.data.schedules;
-        this.give_me_my_money = data.give_me_my_money
-        this.hours_working = Math.round(data.hours_working)
-        if (data) {
-          this.chartData = Array.from(data.entries);
-          console.log("data", this.chartData);
-        }
+
+        this.chartDataNow = response.data.schedules?.schedule_Now || [];
+        this.chartDataPrevious =
+          response.data.schedules?.schedule_Previous || [];
+        this.tasks = response.data.tasks || [];
+
+        // Загружаем данные для обоих месяцев
+        this.hours_working = response.data.schedules?.hours_working || 0;
+        this.hours_working_Previous =
+          response.data.schedules?.hours_working_Previous || 0;
+        this.give_me_my_money = response.data.schedules?.give_me_my_money || 0;
+        this.give_me_my_money_Previous =
+          response.data.schedules?.give_me_my_money_Previous || 0;
+
+        this.setEarliestDate();
+        this.initCurrentWeek();
+        this.updateFilteredChartData();
       } catch (err) {
-        console.log(err);
+        console.error("Error loading info:", err);
       }
+    },
+
+    handleWeekChanged(week) {
+      this.currentWeek = week;
+
+      // Определяем текущий ли это месяц
+      const now = new Date();
+      const selectedMonth = new Date(week.start).getMonth();
+      const currentMonth = now.getMonth();
+
+      this.currentMonthType =
+        selectedMonth === currentMonth ? "now" : "previous";
+      this.updateFilteredChartData();
+    },
+
+    handleMonthChange(monthType) {
+      this.currentMonthType = monthType;
+      this.updateFilteredChartData();
+    },
+
+    // Убедитесь, что initCurrentWeek устанавливает правильные даты
+    initCurrentWeek() {
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - diff);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      this.currentWeek = {
+        start: weekStart.toISOString().split("T")[0],
+        end: weekEnd.toISOString().split("T")[0],
+      };
+    },
+
+    updateFilteredChartData() {
+      if (!this.currentWeek.start) {
+        this.filteredChartData = [];
+        return;
+      }
+
+      // Преобразуем даты недели в полноценные Date объекты
+      const weekStart = new Date(this.currentWeek.start);
+      const weekEnd = new Date(this.currentWeek.end);
+
+      // Устанавливаем время для точного сравнения (начало и конец дня)
+      weekStart.setHours(0, 0, 0, 0);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      console.log(
+        "Фильтрация смен за период:",
+        weekStart.toISOString(),
+        "-",
+        weekEnd.toISOString()
+      );
+
+      // Берем данные в зависимости от выбранного месяца
+      const sourceData =
+        this.currentMonthType === "now"
+          ? this.chartDataNow
+          : this.chartDataPrevious;
+
+      this.filteredChartData = (sourceData || []).filter((entry) => {
+        if (!entry.date_from) return false;
+
+        try {
+          const shiftDate = new Date(entry.date_from);
+          return shiftDate >= weekStart && shiftDate <= weekEnd;
+        } catch (e) {
+          console.error("Ошибка обработки даты:", entry.date_from, e);
+          return false;
+        }
+      });
+
+      console.log("Найдено смен:", this.filteredChartData.length);
+    },
+
+    // Находим минимальную дату в schedule_Previous
+    setEarliestDate() {
+      if (!this.chartDataPrevious.length) return;
+
+      const dates = this.chartDataPrevious.map(
+        (entry) => new Date(entry.date_from)
+      );
+      const minDate = new Date(Math.min(...dates));
+      this.earliestDate = minDate.toISOString().split("T")[0]; // Формат "2025-04-01"
     },
 
     check_verify() {
@@ -173,7 +271,10 @@ export default {
   mounted() {
     this.check_verify();
     this.load_kpi();
-    this.load_info();
+    this.load_info().then(() => {
+      console.log("ChartDataNow:", this.chartDataNow);
+      console.log("FilteredData:", this.filteredChartData);
+    });
   },
 };
 </script>
@@ -236,15 +337,27 @@ export default {
       <div class="fields">
         <div class="field">
           <span class="field-item">Отработано:</span>
-          <span class="field-value">{{ hours_working }} ч.</span>
+          <span class="field-value">{{ currentHours }} ч.</span>
         </div>
         <div class="field">
           <span class="field-item">Заработано:</span>
-          <span class="field-value">{{ give_me_my_money }} руб.</span>
+          <span class="field-value">{{ currentMoney }} руб.</span>
         </div>
       </div>
-      <div class="wrap-bar" v-if="chartData && chartData.length">
-        <ChartBar :scheduleData="chartData" />
+      
+      <DataToggler
+        @week-changed="handleWeekChanged"
+        :earliestDate="earliestDate"
+      />
+
+      <div class="wrap-bar" v-if="filteredChartData.length > 0">
+        <ChartBar
+          :scheduleData="filteredChartData"
+          :key="JSON.stringify(filteredChartData)"
+        />
+      </div>
+      <div v-else>
+        <p>Нет смен на выбранную неделю</p>
       </div>
     </div>
   </div>
@@ -373,7 +486,8 @@ input[type="checkbox"]:focus {
 
 .tasks,
 .empty,
-.wrap-group, .fields {
+.wrap-group,
+.fields {
   padding-left: 20px;
 }
 
