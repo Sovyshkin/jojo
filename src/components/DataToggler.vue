@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      currentDate: new Date(), // Всегда понедельник выбранной недели
+      currentDate: new Date(), // Всегда начало выбранной недели
       today: new Date(),
     };
   },
@@ -35,26 +35,34 @@ export default {
       return this.earliestDate ? new Date(this.earliestDate) : null;
     },
     
-    // Конец текущей недели (воскресенье)
     weekEnd() {
       const end = new Date(this.currentDate);
+      // Неделя заканчивается в воскресенье (6 дней после понедельника)
       end.setDate(end.getDate() + 6);
       return end;
     },
     
-    // Форматированные даты для отображения
     formattedWeekStart() {
       return this.formatDate(this.currentDate);
     },
+    
     formattedWeekEnd() {
       return this.formatDate(this.weekEnd);
     },
     
     isCurrentWeek() {
-      return this.weekEnd >= this.today;
+      const today = new Date();
+      return this.weekEnd >= today && this.currentDate <= today;
     },
+    
     isFirstWeek() {
-      return this.minDate && this.currentDate <= this.minDate;
+      if (!this.minDate) return false;
+      
+      // Проверяем, что текущая неделя не может быть раньше минимальной даты
+      // const weekStart = new Date(this.currentDate);
+      const weekEnd = new Date(this.weekEnd);
+      
+      return weekEnd <= this.minDate;
     },
   },
   methods: {
@@ -62,8 +70,14 @@ export default {
       const newDate = new Date(this.currentDate);
       newDate.setDate(newDate.getDate() - 7);
       
-      if (!this.minDate || newDate >= this.minDate) {
+      // Проверяем, что новая неделя не раньше самой первой даты
+      if (!this.minDate || newDate >= new Date(this.minDate)) {
         this.currentDate = newDate;
+        this.emitWeekChange();
+      } else {
+        // Если новая неделя начинается раньше минимальной даты,
+        // устанавливаем начало недели как минимальную дату
+        this.currentDate = new Date(this.minDate);
         this.emitWeekChange();
       }
     },
@@ -79,8 +93,8 @@ export default {
     
     emitWeekChange() {
       this.$emit('week-changed', {
-        start: new Date(this.currentDate),
-        end: new Date(this.weekEnd),
+        start: this.currentDate.toISOString().split('T')[0],
+        end: this.weekEnd.toISOString().split('T')[0],
       });
     },
     
@@ -92,12 +106,17 @@ export default {
     },
   },
   created() {
-    // Устанавливаем начало текущей недели (понедельник)
+    // Устанавливаем начало текущей недели
     const dayOfWeek = this.today.getDay();
-    const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0 для воскресенья, 1 для понедельника и т.д.
     this.currentDate.setDate(this.today.getDate() - diff);
+    this.currentDate.setHours(0, 0, 0, 0);
     
-    // Инициируем первое событие
+    // Если есть earliestDate, проверяем, не начинается ли текущая неделя раньше
+    if (this.minDate && this.currentDate < this.minDate) {
+      this.currentDate = new Date(this.minDate);
+    }
+    
     this.emitWeekChange();
   },
 };

@@ -8,50 +8,7 @@ export default {
   data() {
     return {
       cards: [],
-      chartData: {},
       tasks: [
-        {
-          id: 1,
-          desc: "Задача 1",
-          done: false,
-          userID: 1,
-          deadline: "",
-        },
-        {
-          id: 2,
-          desc: "Задача 2",
-          done: false,
-          userID: 1,
-          deadline: "",
-        },
-        {
-          id: 3,
-          desc: "Задача 3",
-          done: true,
-          userID: 1,
-          deadline: "",
-        },
-        {
-          id: 1,
-          desc: "Задача 1",
-          done: false,
-          userID: 1,
-          deadline: "",
-        },
-        {
-          id: 2,
-          desc: "Задача 2",
-          done: false,
-          userID: 1,
-          deadline: "",
-        },
-        {
-          id: 3,
-          desc: "Задача 3",
-          done: true,
-          userID: 1,
-          deadline: "",
-        },
         {
           id: 1,
           desc: "Задача 1",
@@ -82,7 +39,7 @@ export default {
       hours_working_Previous: 0,
       give_me_my_money: 0,
       give_me_my_money_Previous: 0,
-      chartDataNow: [], // Все данные за текущий месяц
+      scheduleData: [], // Все данные смен (объединенные)
       filteredChartData: [], // Данные за выбранную неделю
       currentWeek: { start: null, end: null },
       earliestDate: null,
@@ -117,9 +74,7 @@ export default {
           params: { phone: localStorage.getItem("phone") },
         });
 
-        this.chartDataNow = response.data.schedules?.schedule_Now || [];
-        this.chartDataPrevious =
-          response.data.schedules?.schedule_Previous || [];
+        this.scheduleData = response.data.schedules?.schedule_only || [];
         this.tasks = response.data.tasks || [];
 
         // Загружаем данные для обоих месяцев
@@ -140,14 +95,6 @@ export default {
 
     handleWeekChanged(week) {
       this.currentWeek = week;
-
-      // Определяем текущий ли это месяц
-      const now = new Date();
-      const selectedMonth = new Date(week.start).getMonth();
-      const currentMonth = now.getMonth();
-
-      this.currentMonthType =
-        selectedMonth === currentMonth ? "now" : "previous";
       this.updateFilteredChartData();
     },
 
@@ -156,7 +103,6 @@ export default {
       this.updateFilteredChartData();
     },
 
-    // Убедитесь, что initCurrentWeek устанавливает правильные даты
     initCurrentWeek() {
       const today = new Date();
       const dayOfWeek = today.getDay();
@@ -182,11 +128,9 @@ export default {
         return;
       }
 
-      // Преобразуем даты недели в полноценные Date объекты
       const weekStart = new Date(this.currentWeek.start);
       const weekEnd = new Date(this.currentWeek.end);
 
-      // Устанавливаем время для точного сравнения (начало и конец дня)
       weekStart.setHours(0, 0, 0, 0);
       weekEnd.setHours(23, 59, 59, 999);
 
@@ -197,13 +141,7 @@ export default {
         weekEnd.toISOString()
       );
 
-      // Берем данные в зависимости от выбранного месяца
-      const sourceData =
-        this.currentMonthType === "now"
-          ? this.chartDataNow
-          : this.chartDataPrevious;
-
-      this.filteredChartData = (sourceData || []).filter((entry) => {
+      this.filteredChartData = (this.scheduleData || []).filter((entry) => {
         if (!entry.date_from) return false;
 
         try {
@@ -215,18 +153,42 @@ export default {
         }
       });
 
+      // Определяем тип месяца (текущий или предыдущий) на основе выбранной недели
+      const now = new Date();
+      const selectedMonth = new Date(this.currentWeek.start).getMonth();
+      const currentMonth = now.getMonth();
+
+      this.currentMonthType =
+        selectedMonth === currentMonth ? "now" : "previous";
+
       console.log("Найдено смен:", this.filteredChartData.length);
     },
 
-    // Находим минимальную дату в schedule_Previous
     setEarliestDate() {
-      if (!this.chartDataPrevious.length) return;
+      if (!this.scheduleData.length) return;
 
-      const dates = this.chartDataPrevious.map(
-        (entry) => new Date(entry.date_from)
-      );
-      const minDate = new Date(Math.min(...dates));
-      this.earliestDate = minDate.toISOString().split("T")[0]; // Формат "2025-04-01"
+      // Находим минимальную дату среди всех смен
+      const validDates = this.scheduleData
+        .map((entry) => {
+          try {
+            return new Date(entry.date_from);
+          } catch {
+            return null;
+          }
+        })
+        .filter((date) => date && !isNaN(date.getTime()));
+
+      if (validDates.length === 0) return;
+
+      const minDate = new Date(Math.min(...validDates));
+
+      // Устанавливаем начало недели для минимальной даты
+      const dayOfWeek = minDate.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Находим предыдущий понедельник
+      const weekStart = new Date(minDate);
+      weekStart.setDate(minDate.getDate() + diff);
+
+      this.earliestDate = weekStart.toISOString().split("T")[0];
     },
 
     check_verify() {
@@ -253,18 +215,17 @@ export default {
         console.log(err);
       }
     },
+
     lowerText(text) {
       if (typeof text !== "string") {
         console.warn("Пожалуйста, передайте строку в качестве аргумента.");
         return "";
       }
 
-      // Проверяем, не пустая ли строка
       if (text.length === 0) {
         return "";
       }
 
-      // Преобразуем всю строку в нижний регистр и заглавим первый символ
       return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
     },
   },
@@ -272,7 +233,7 @@ export default {
     this.check_verify();
     this.load_kpi();
     this.load_info().then(() => {
-      console.log("ChartDataNow:", this.chartDataNow);
+      console.log("ScheduleData:", this.scheduleData);
       console.log("FilteredData:", this.filteredChartData);
     });
   },
@@ -344,7 +305,7 @@ export default {
           <span class="field-value">{{ currentMoney }} руб.</span>
         </div>
       </div>
-      
+
       <DataToggler
         @week-changed="handleWeekChanged"
         :earliestDate="earliestDate"
