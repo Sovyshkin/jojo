@@ -7,10 +7,23 @@ export default {
     return {
       isLoading: false,
       phone: localStorage.getItem("phone"),
+      showNav: true,
+      lastScrollPosition: 0,
     };
   },
-  methods: {},
-  mounted() {},
+  methods: {
+    handleScroll() {
+      const currentScrollPosition = window.scrollY;
+      this.showNav = currentScrollPosition < this.lastScrollPosition;
+      this.lastScrollPosition = currentScrollPosition;
+    },
+  },
+  mounted() {
+    window.addEventListener("scroll", this.handleScroll);
+  },
+  beforeUnmount() {
+  window.removeEventListener('scroll', this.handleScroll);
+}
 };
 </script>
 
@@ -28,6 +41,7 @@ export default {
   </main>
   <AppNav
     v-if="
+      showNav &&
       $route.path != '/' &&
       $route.name != 'commercialSecret' &&
       $route.name != 'employmentContract' &&

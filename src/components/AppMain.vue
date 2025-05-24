@@ -324,17 +324,20 @@ export default {
   </div>
 </template>
 <style scoped>
+
 .wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 80px; /* Добавляем отступ равный высоте навигации */
 }
+
 .card {
   max-width: 700px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  height: 90vh;
+  height: calc(90vh - 80px); /* Уменьшаем высоту с учетом отступа */
   overflow-y: scroll;
   overflow-x: hidden;
 }

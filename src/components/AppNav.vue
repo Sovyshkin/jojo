@@ -64,7 +64,7 @@ export default {
   </div>
 </template>
 <style scoped>
-.wrapper {
+/** .wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -76,7 +76,7 @@ export default {
   z-index: 999;
   height: 10vh;
   background-color: #fff;
-}
+} **/
 
 .group {
   list-style: none;
