@@ -100,6 +100,34 @@ export default {
   scale: 1.4;
 }
 
+.wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 25px;
+  border-top: 2px solid black;
+  position: fixed; /* Меняем absolute на fixed */
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  height: auto;
+  background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
+  backdrop-filter: blur(5px); /* Эффект размытия под навигацией */
+}
+
+/* Уменьшаем отступы между иконками для мобильных */
+@media (max-width: 540px) {
+  .group {
+    gap: 30px;
+  }
+  
+  .item img {
+    height: 28px;
+    min-width: 28px;
+  }
+}
+
 @media (max-width: 540px) {
   .group {
     width: 100%;

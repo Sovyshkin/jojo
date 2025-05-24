@@ -13,7 +13,6 @@
     <button 
       @click="nextWeek" 
       class="date-switcher__button"
-      :disabled="isCurrentWeek"
     >→</button>
   </div>
 </template>
@@ -37,7 +36,6 @@ export default {
     
     weekEnd() {
       const end = new Date(this.currentDate);
-      // Неделя заканчивается в воскресенье (6 дней после понедельника)
       end.setDate(end.getDate() + 6);
       return end;
     },
@@ -50,18 +48,9 @@ export default {
       return this.formatDate(this.weekEnd);
     },
     
-    isCurrentWeek() {
-      const today = new Date();
-      return this.weekEnd >= today && this.currentDate <= today;
-    },
-    
     isFirstWeek() {
       if (!this.minDate) return false;
-      
-      // Проверяем, что текущая неделя не может быть раньше минимальной даты
-      // const weekStart = new Date(this.currentDate);
       const weekEnd = new Date(this.weekEnd);
-      
       return weekEnd <= this.minDate;
     },
   },
@@ -70,21 +59,16 @@ export default {
       const newDate = new Date(this.currentDate);
       newDate.setDate(newDate.getDate() - 7);
       
-      // Проверяем, что новая неделя не раньше самой первой даты
       if (!this.minDate || newDate >= new Date(this.minDate)) {
         this.currentDate = newDate;
         this.emitWeekChange();
       } else {
-        // Если новая неделя начинается раньше минимальной даты,
-        // устанавливаем начало недели как минимальную дату
         this.currentDate = new Date(this.minDate);
         this.emitWeekChange();
       }
     },
     
     nextWeek() {
-      if (this.isCurrentWeek) return;
-      
       const newDate = new Date(this.currentDate);
       newDate.setDate(newDate.getDate() + 7);
       this.currentDate = newDate;
@@ -106,13 +90,11 @@ export default {
     },
   },
   created() {
-    // Устанавливаем начало текущей недели
     const dayOfWeek = this.today.getDay();
-    const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0 для воскресенья, 1 для понедельника и т.д.
+    const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     this.currentDate.setDate(this.today.getDate() - diff);
     this.currentDate.setHours(0, 0, 0, 0);
     
-    // Если есть earliestDate, проверяем, не начинается ли текущая неделя раньше
     if (this.minDate && this.currentDate < this.minDate) {
       this.currentDate = new Date(this.minDate);
     }
