@@ -18,171 +18,137 @@ export default {
   },
   props: {
     scheduleData: {
-    type: Array,
-    required: true,
-    validator: (value) => {
-      return Array.isArray(value) && 
-        value.every(item => item.date_from && item.date_to);
+      type: Array,
+      required: true,
+      validator: (value) => {
+        return Array.isArray(value) && 
+          value.every(item => item && item.date_from && item.date_to);
+      }
     }
-  }
   },
   data() {
     return {
       chartOptions: {
         chart: {
           type: "rangeBar",
-          height: 500, // Уменьшаем высоту для мобильных устройств
-          width: "100%",
-          toolbar: {
-            show: false, // Скрываем тулбар на мобильных устройствах
-          },
+          height: 500,
+          toolbar: { show: false },
         },
         plotOptions: {
           bar: {
             horizontal: false,
-            barHeight: "80%",
-            colors: {
-              ranges: [
-                {
-                  from: 0,
-                  to: 100,
-                  color: "#365811", // Цвет столбцов
-                },
-              ],
-            },
+            colors: { ranges: [{ from: 0, to: 100, color: "#365811" }] },
           },
         },
         xaxis: {
           categories: ["пн", "вт", "ср", "чт", "пт", "сб", "вс"],
-          title: {
-            text: "",
-            style: {
-              fontSize: "12px", // Уменьшаем размер шрифта
-            },
-          },
-          labels: {
-            style: {
-              fontSize: "10px", // Уменьшаем размер шрифта
-            },
-          },
         },
         yaxis: {
-          min: 8, // Начало с 8:00
-          max: 24, // Конец в 24:00
-          tickAmount: 16, // Уменьшаем количество делений для мобильных устройств
-          title: {
-            text: "",
-            style: {
-              fontSize: "12px", // Уменьшаем размер шрифта
-            },
-          },
+          min: 0,
+          max: 24,
+          tickAmount: 8,
           labels: {
-            formatter: (value) => `${value}:00`,
-            style: {
-              fontSize: "10px", // Уменьшаем размер шрифта
-            },
+            formatter: (val) => val === 24 ? '00:00' : `${Math.floor(val)}:00`
           },
         },
         tooltip: {
           enabled: true,
-          y: {
-            formatter: (value) => `${value}:00`,
-          },
+          custom: function({ series, seriesIndex, dataPointIndex, w }) {
+            console.log(series);
+            const data = w.globals.initialSeries[seriesIndex].data[dataPointIndex];
+            if (!data || !data.y) {
+              return '<div class="tooltip-box">Нет данных</div>';
+            }
+
+            const [start, end] = data.y;
+            const day = w.globals.labels[dataPointIndex];
+
+            const formatTime = (val) => {
+              if (val >= 24) val -= 24;
+              const hours = Math.floor(val);
+              const minutes = Math.round((val - hours) * 60);
+              return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+
+            return `
+              <div class="tooltip-box">
+                <strong>${day}</strong>
+                <div>${formatTime(start)} - ${formatTime(end)}</div>
+              </div>
+            `;
+          }
         },
-        dataLabels: {
-          enabled: false,
-        },
-        responsive: [
-          {
-            breakpoint: 480, // Настройки для экранов меньше 480px
-            options: {
-              chart: {
-                height: 350, // Уменьшаем высоту для мобильных устройств
-              },
-              xaxis: {
-                labels: {
-                  style: {
-                    fontSize: "10px", // Уменьшаем размер шрифта
-                  },
-                },
-              },
-              yaxis: {
-                min: 8, // Начало с 8:00
-                max: 24, // Конец в 24:00
-                tickAmount: 16, // Уменьшаем количество делений для мобильных устройств
-                labels: {
-                  style: {
-                    fontSize: "10px", // Уменьшаем размер шрифта
-                  },
-                },
-              },
-            },
-          },
-        ],
       },
     };
   },
   computed: {
     chartSeries() {
-      try {
-        console.log("scheduleData:", this.scheduleData); // Для отладки
+      if (!this.scheduleData || this.scheduleData.length === 0) return [];
 
-        if (this.scheduleData && this.scheduleData.length > 0) {
-          const dayMapping = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-          const seriesData = this.scheduleData.map((entry) => {
-            const startTime = new Date(entry.date_from).getHours(); // Локальное время
-            let endTime = new Date(entry.date_to).getHours(); // Локальное время
-
-            // Если endTime равно 0 (00:00), заменяем на 24
-            if (endTime === 0) {
-              endTime = 24;
+      const dayMap = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+      
+      return [{
+        name: "Часы работы",
+        data: this.scheduleData.map(item => {
+          try {
+            const startDate = new Date(item.date_from);
+            const endDate = new Date(item.date_to);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+              console.error('Invalid date format:', item);
+              return null;
             }
 
-            const dayOfWeek = dayMapping[new Date(entry.date_from).getDay()]; // День недели
-
-            console.log("entry:", entry);
-            console.log("startTime:", startTime);
-            console.log("endTime:", endTime);
-            console.log("dayOfWeek:", dayOfWeek);
+            const startHours = startDate.getHours();
+            const startMinutes = startDate.getMinutes();
+            const endHours = endDate.getHours();
+            const endMinutes = endDate.getMinutes();
+            
+            const startDecimal = startHours + (startMinutes / 60);
+            let endDecimal = endHours + (endMinutes / 60);
+            
+            if (endDecimal < startDecimal) {
+              endDecimal += 24;
+            }
+            
+            if (endHours === 0 && endMinutes === 0) {
+              endDecimal = 24;
+            }
 
             return {
-              x: dayOfWeek,
-              y: [startTime, endTime],
+              x: dayMap[startDate.getDay()],
+              y: [startDecimal, endDecimal],
             };
-          });
-
-          console.log("seriesData:", seriesData); // Отладка
-
-          return [
-            {
-              name: "Рабочие часы",
-              data: seriesData,
-            },
-          ];
-        } else {
-          console.error("scheduleData is empty or not provided");
-          return [];
-        }
-      } catch (err) {
-        console.error("Error in chartSeries computation:", err);
-        return [];
-      }
+          } catch (e) {
+            console.error('Error processing shift:', item, e);
+            return null;
+          }
+        }).filter(Boolean)
+      }];
     },
-  },
-  mounted() {
-    console.log("Props scheduleData:", this.scheduleData); // Проверка передачи данных
   },
 };
 </script>
 
 <style scoped>
-.apexcharts-canvas {
-  min-height: 300px !important;
-  width: 100% !important;
-}
-
 .chart-container {
   width: 100%;
-  overflow-x: auto;
+  min-height: 400px;
+}
+
+:deep(.tooltip-box) {
+  padding: 8px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid #eee;
+}
+:deep(.tooltip-box strong) {
+  display: block;
+  margin-bottom: 4px;
+  color: #333;
+}
+:deep(.tooltip-box div) {
+  color: #666;
 }
 </style>
