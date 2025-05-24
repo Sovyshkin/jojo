@@ -1,7 +1,6 @@
 <script>
 export default {
   name: "AppNav",
-  components: {},
   data() {
     return {
       active: "",
@@ -12,15 +11,10 @@ export default {
       this.check_active(name);
       this.$router.push({ name });
     },
-
     check_active(name) {
-      if (name == "academy") {
-        this.active = "1";
-      } else if (name == "main") {
-        this.active = "2";
-      } else if (name == "news") {
-        this.active = "3";
-      }
+      if (name == "academy") this.active = "1";
+      else if (name == "main") this.active = "2";
+      else if (name == "news") this.active = "3";
     },
   },
   mounted() {
@@ -28,8 +22,9 @@ export default {
   },
 };
 </script>
+
 <template>
-  <div class="wrapper">
+  <div class="nav-wrapper">
     <nav class="group">
       <div class="item" @click="$router.go(-1)">
         <img
@@ -63,20 +58,21 @@ export default {
     </nav>
   </div>
 </template>
+
 <style scoped>
-/** .wrapper {
-  width: 100%;
+.nav-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 25px;
-  border-top: 2px solid black;
-  position: absolute;
-  bottom: 0;
-  z-index: 999;
-  height: 10vh;
-  background-color: #fff;
-} **/
+  z-index: 100;
+}
 
 .group {
   list-style: none;
@@ -100,39 +96,12 @@ export default {
   scale: 1.4;
 }
 
-.wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px 25px;
-  border-top: 2px solid black;
-  position: fixed; /* Меняем absolute на fixed */
-  bottom: 0;
-  left: 0;
-  z-index: 999;
-  height: auto;
-  background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
-  backdrop-filter: blur(5px); /* Эффект размытия под навигацией */
-}
-
-/* Уменьшаем отступы между иконками для мобильных */
-@media (max-width: 540px) {
-  .group {
-    gap: 30px;
-  }
-  
-  .item img {
-    height: 28px;
-    min-width: 28px;
-  }
-}
-
 @media (max-width: 540px) {
   .group {
     width: 100%;
     justify-content: space-between;
     gap: 0;
   }
+
 }
 </style>

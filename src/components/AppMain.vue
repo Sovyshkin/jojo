@@ -34,13 +34,13 @@ export default {
       phone: "",
       passport: false,
       medcine: false,
-      currentMonthType: "now", // "now" или "previous"
+      currentMonthType: "now",
       hours_working: 0,
       hours_working_Previous: 0,
       give_me_my_money: 0,
       give_me_my_money_Previous: 0,
-      scheduleData: [], // Все данные смен (объединенные)
-      filteredChartData: [], // Данные за выбранную неделю
+      scheduleData: [],
+      filteredChartData: [],
       currentWeek: { start: null, end: null },
       earliestDate: null,
     };
@@ -61,30 +61,24 @@ export default {
     async load_kpi() {
       try {
         let response = await axios.post(`/kpi`);
-        console.log(response);
         this.cards = response.data.kpi;
       } catch (err) {
         console.log(err);
       }
     },
-
     async load_info() {
       try {
         const response = await axios.post(`/tasks/by_user`, {
           params: { phone: localStorage.getItem("phone") },
         });
-
         this.scheduleData = response.data.schedules?.schedule_only || [];
         this.tasks = response.data.tasks || [];
-
-        // Загружаем данные для обоих месяцев
         this.hours_working = response.data.schedules?.hours_working || 0;
         this.hours_working_Previous =
           response.data.schedules?.hours_working_Previous || 0;
         this.give_me_my_money = response.data.schedules?.give_me_my_money || 0;
         this.give_me_my_money_Previous =
           response.data.schedules?.give_me_my_money_Previous || 0;
-
         this.setEarliestDate();
         this.initCurrentWeek();
         this.updateFilteredChartData();
@@ -92,58 +86,36 @@ export default {
         console.error("Error loading info:", err);
       }
     },
-
     handleWeekChanged(week) {
       this.currentWeek = week;
       this.updateFilteredChartData();
     },
-
-    handleMonthChange(monthType) {
-      this.currentMonthType = monthType;
-      this.updateFilteredChartData();
-    },
-
     initCurrentWeek() {
       const today = new Date();
       const dayOfWeek = today.getDay();
       const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-
       const weekStart = new Date(today);
       weekStart.setDate(today.getDate() - diff);
       weekStart.setHours(0, 0, 0, 0);
-
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999);
-
       this.currentWeek = {
         start: weekStart.toISOString().split("T")[0],
         end: weekEnd.toISOString().split("T")[0],
       };
     },
-
     updateFilteredChartData() {
       if (!this.currentWeek.start) {
         this.filteredChartData = [];
         return;
       }
-
       const weekStart = new Date(this.currentWeek.start);
       const weekEnd = new Date(this.currentWeek.end);
-
       weekStart.setHours(0, 0, 0, 0);
       weekEnd.setHours(23, 59, 59, 999);
-
-      console.log(
-        "Фильтрация смен за период:",
-        weekStart.toISOString(),
-        "-",
-        weekEnd.toISOString()
-      );
-
       this.filteredChartData = (this.scheduleData || []).filter((entry) => {
         if (!entry.date_from) return false;
-
         try {
           const shiftDate = new Date(entry.date_from);
           return shiftDate >= weekStart && shiftDate <= weekEnd;
@@ -152,22 +124,14 @@ export default {
           return false;
         }
       });
-
-      // Определяем тип месяца (текущий или предыдущий) на основе выбранной недели
       const now = new Date();
       const selectedMonth = new Date(this.currentWeek.start).getMonth();
       const currentMonth = now.getMonth();
-
       this.currentMonthType =
         selectedMonth === currentMonth ? "now" : "previous";
-
-      console.log("Найдено смен:", this.filteredChartData.length);
     },
-
     setEarliestDate() {
       if (!this.scheduleData.length) return;
-
-      // Находим минимальную дату среди всех смен
       const validDates = this.scheduleData
         .map((entry) => {
           try {
@@ -177,20 +141,14 @@ export default {
           }
         })
         .filter((date) => date && !isNaN(date.getTime()));
-
       if (validDates.length === 0) return;
-
       const minDate = new Date(Math.min(...validDates));
-
-      // Устанавливаем начало недели для минимальной даты
       const dayOfWeek = minDate.getDay();
-      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Находим предыдущий понедельник
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       const weekStart = new Date(minDate);
       weekStart.setDate(minDate.getDate() + diff);
-
       this.earliestDate = weekStart.toISOString().split("T")[0];
     },
-
     check_verify() {
       try {
         this.phone = localStorage.getItem("phone");
@@ -201,46 +159,31 @@ export default {
         console.log(err);
       }
     },
-
     async changeComp(id, value) {
       try {
-        let response = await axios.post(`/tasks/set_completed`, {
-          params: {
-            id,
-            completed: value,
-          },
+        await axios.post(`/tasks/set_completed`, {
+          params: { id, completed: value },
         });
-        console.log(response);
       } catch (err) {
         console.log(err);
       }
     },
-
     lowerText(text) {
-      if (typeof text !== "string") {
-        console.warn("Пожалуйста, передайте строку в качестве аргумента.");
-        return "";
-      }
-
-      if (text.length === 0) {
-        return "";
-      }
-
+      if (typeof text !== "string") return "";
+      if (text.length === 0) return "";
       return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
     },
   },
   mounted() {
     this.check_verify();
     this.load_kpi();
-    this.load_info().then(() => {
-      console.log("ScheduleData:", this.scheduleData);
-      console.log("FilteredData:", this.filteredChartData);
-    });
+    this.load_info();
   },
 };
 </script>
+
 <template>
-  <div class="wrapper">
+  <div class="main-content">
     <div class="card">
       <div class="wrap-btns" v-if="phone == '+79449445678'">
         <button @click="$router.push({ name: 'personal_data' })" class="btn">
@@ -323,35 +266,22 @@ export default {
     </div>
   </div>
 </template>
-<style scoped>
 
-.wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 80px; /* Добавляем отступ равный высоте навигации */
+<style scoped>
+.main-content {
+  width: 100%;
+  padding-bottom: 80px; /* Отступ для навигации */
 }
 
 .card {
   max-width: 700px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  height: calc(90vh - 80px); /* Уменьшаем высоту с учетом отступа */
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-h1 {
-  font-weight: 500;
-  font-size: 25px;
-  padding-top: 5px;
-  border-top: 1px solid black;
+  padding: 20px;
 }
 
-.kpi {
-  padding-top: 0;
-  border-top: none;
-}
 .wrap-scale {
   position: relative;
   max-width: 200px;

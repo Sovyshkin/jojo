@@ -3,51 +3,24 @@ import AppNav from "./components/AppNav.vue";
 export default {
   name: "App",
   components: { AppNav },
-  data() {
-    return {
-      isLoading: false,
-      phone: localStorage.getItem("phone"),
-      showNav: true,
-      lastScrollPosition: 0,
-    };
-  },
-  methods: {
-    handleScroll() {
-      const currentScrollPosition = window.scrollY;
-      this.showNav = currentScrollPosition < this.lastScrollPosition;
-      this.lastScrollPosition = currentScrollPosition;
+  computed: {
+    shouldShowNav() {
+      return (
+        this.$route.path != "/" &&
+        this.$route.name != "commercialSecret" &&
+        this.$route.name != "employmentContract" &&
+        this.$route.name != "upload_doc"
+      );
     },
   },
-  mounted() {
-    window.addEventListener("scroll", this.handleScroll);
-  },
-  beforeUnmount() {
-  window.removeEventListener('scroll', this.handleScroll);
-}
 };
 </script>
 
 <template>
   <main>
-    <router-view
-      class="wrapView"
-      :class="{
-        fullScreen:
-          $route.path == '/' ||
-          $route.name == 'commercialSecret' ||
-          $route.name == 'employmentContract',
-      }"
-    ></router-view>
+    <router-view></router-view>
+    <AppNav v-if="shouldShowNav" />
   </main>
-  <AppNav
-    v-if="
-      showNav &&
-      $route.path != '/' &&
-      $route.name != 'commercialSecret' &&
-      $route.name != 'employmentContract' &&
-      $route.name != 'upload_doc'
-    "
-  />
 </template>
 
 <style>
